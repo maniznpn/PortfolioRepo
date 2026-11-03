@@ -1,0 +1,41 @@
+/* Text effects — played when a film scene is on (.scene-on) or an experience card arrives (.in). */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.fw{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.1em;margin-bottom:-.1em}
+.fw>span,.dw,.tc,.cl{display:inline-block}
+.key{position:relative;color:var(--text);font-weight:560}
+.key:after{content:"";position:absolute;left:0;right:0;bottom:-.08em;height:1px;background:var(--accent);transform:scaleX(0);transform-origin:left}
+
+/* headings: words rise out of masks */
+.scene-on .fw>span{animation:fx-rise 1s cubic-bezier(.16,1,.3,1) calc(.15s + var(--i) * .08s) both}
+/* sentences: words come into focus one by one */
+.scene-on .exp-sum .dw,.scene-on .msg-sub .dw{animation:fx-focus .9s cubic-bezier(.16,1,.3,1) calc(.55s + var(--i) * .03s) both}
+/* experience bullets: line after line as the card arrives, key terms underlined last */
+.exp-item.in .exp-card li .dw{animation:fx-focus .8s cubic-bezier(.16,1,.3,1) calc(.5s + var(--l) * .32s + var(--i) * .018s) both}
+.exp-item.in .exp-card li .key:after{animation:fx-sweep .7s cubic-bezier(.65,0,.35,1) calc(1.5s + var(--l) * .32s + var(--i) * .02s) both}
+/* projects: title rises, description resolves, tags type in with a cursor */
+.scene-on #projects .grid article h3 .fw>span{animation-delay:calc(.35s + var(--n) * .14s + var(--i) * .07s)}
+.scene-on #projects .grid article p .dw{animation:fx-focus .8s cubic-bezier(.16,1,.3,1) calc(.55s + var(--n) * .14s + var(--i) * .02s) both}
+.scene-on #projects .grid article p .key:after{animation:fx-sweep .7s cubic-bezier(.65,0,.35,1) calc(1.6s + var(--n) * .14s + var(--i) * .02s) both}
+.scene-on #projects .grid article .tc{animation:fx-type .01s steps(1) calc(1.3s + var(--n) * .3s + var(--c) * .028s) both}
+.tcur{display:inline-block;width:.55em;height:1.05em;margin-left:2px;vertical-align:-.15em;background:var(--accent);opacity:0}
+.scene-on #projects .grid article .tcur{animation:fx-type .01s steps(1) calc(1.3s + var(--n) * .3s + var(--c) * .028s) both,fx-blink 1s steps(2) calc(1.3s + var(--n) * .3s + var(--c) * .028s) 4 forwards}
+/* contact: tagline words, then the email resolves from the centre */
+footer.scene-on .ft-tag .dw{animation:fx-focus .9s cubic-bezier(.16,1,.3,1) calc(.2s + var(--i) * .06s) both}
+footer.scene-on > a .cl{animation:fx-centre 1.1s cubic-bezier(.16,1,.3,1) calc(.5s + var(--d) * .045s) both}
+.ft-tag{margin:0;font-size:clamp(15px,1.4vw,19px);color:var(--muted)}
+.film footer:before{content:none!important}
+
+@keyframes fx-rise{from{transform:translateY(108%) rotate(3deg)}}
+@keyframes fx-focus{from{opacity:0;filter:blur(8px);transform:translateY(.4em)}to{opacity:1;filter:blur(0);transform:none}}
+@keyframes fx-sweep{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes fx-type{from{opacity:0}to{opacity:1}}
+@keyframes fx-blink{50%{opacity:0}}
+@keyframes fx-centre{from{opacity:0;filter:blur(12px);transform:scale(1.6)}to{opacity:1;filter:blur(0);transform:none}}
+
+/* without the film (or with reduced motion) everything simply shows, underlines drawn */
+html:not(.film) .key:after{transform:none}
+@media (prefers-reduced-motion:reduce){
+  .fw>span,.dw,.tc,.cl,.tcur,.key:after{animation:none!important}
+  .key:after{transform:none}
+  .tcur{display:none}
+}

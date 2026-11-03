@@ -6,7 +6,8 @@
 
   // intro: shown on every page load (the class is set by a tiny script in <head> so nothing flashes)
   const root = document.documentElement;
-  if (root.classList.contains('intro-on')) {
+  // (in film mode the film controller plays the intro as its first scene instead)
+  if (root.classList.contains('intro-on') && !root.classList.contains('film')) {
     let done = false;
     const leave = () => {
       if (done) return; done = true;

@@ -147,6 +147,23 @@
     if (on) schedule(); else cancelAuto();
   }
 
+  /* ---------- film mode: the page-wide film controller drives the stages instead of the scroll ---------- */
+  if (document.documentElement.classList.contains('film')) {
+    track.removeAttribute('data-pre');
+    track.style.setProperty('--f', 0); track.style.setProperty('--fa', 0);
+    window.FilmJourney = {
+      count: LAST + 1,
+      dwell: DWELL.concat([3600]),
+      go(s, force) {
+        s = Math.max(0, Math.min(LAST, s));
+        track.style.setProperty('--p', (s / LAST).toFixed(4));
+        if (force || s !== stage) enter(s);
+      }
+    };
+    enter(0);
+    return;
+  }
+
   /* ---------- wiring ---------- */
   const inputs = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
   new IntersectionObserver(([e]) => {

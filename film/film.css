@@ -1,0 +1,107 @@
+/* Film mode — the whole portfolio on one fixed screen, played as scenes that loop.
+   html.film is set in <head>; html.film-ready once film.js has taken over. */
+html.film,html.film body{height:100%;overflow:hidden;overscroll-behavior:none}
+.film header{position:fixed;left:0;right:0;top:0}
+
+/* every section, and the footer, becomes a full-screen scene */
+.film main{position:fixed;top:72px;left:0;right:0;bottom:0;width:auto;margin:0}
+.film main>section,.film footer{position:absolute;inset:0;width:auto;margin:0;border:0;overflow:hidden}
+.film main>section{padding:40px max(24px,calc((100vw - 1100px) / 2)) 96px}
+.film main>section>*{translate:0 var(--pan,0px)}
+.film footer{position:fixed;top:72px;bottom:0;left:0;right:0;padding:40px 24px 96px}
+
+/* before the controller runs, show only the opening scene */
+.film:not(.film-ready) main>section:not(.hero),.film:not(.film-ready) footer{display:none}
+
+/* scene states */
+.film-ready main>section,.film-ready footer{opacity:0;visibility:hidden;pointer-events:none}
+.film-ready .scene-on{opacity:1;visibility:visible;pointer-events:auto;z-index:1;animation:scene-in 1s cubic-bezier(.16,1,.3,1) both}
+.film-ready .scene-off{visibility:visible;z-index:0;animation:scene-out .7s cubic-bezier(.7,0,.2,1) both}
+@keyframes scene-in{from{opacity:0;transform:translateY(26px) scale(1.015);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+@keyframes scene-out{from{opacity:1;transform:none;filter:none}to{opacity:0;transform:translateY(-22px) scale(.985);filter:blur(8px)}}
+
+/* hero fills its scene */
+.film .hero{min-height:0;align-content:center}
+.film .hero-cue{bottom:104px}
+@media (max-width:900px){.film .hero-cue{display:none}}
+
+/* journey: the pinned room becomes the whole scene */
+.film #journey{padding:0}
+.film #journey .journey-head{display:none}
+.film .journey{--pin-h:calc(100vh - 72px)}
+@supports (height:100svh){.film .journey{--pin-h:calc(100svh - 72px)}}
+.film .journey-track{position:absolute;inset:0;height:auto!important;margin:0}
+.film .journey-pin{position:absolute!important;inset:0;top:0!important;height:auto!important;width:auto;margin:0}
+.film .journey-auto,.film .journey-skip{display:none!important}
+.film .js-journey .journey-rail,.film .journey-rail{bottom:84px!important}
+.film .journey-rail button{pointer-events:none}
+
+/* experience: the timeline starts empty and fills as the camera pans down it */
+.film .exp-head{position:static}
+
+/* projects: cards rise in one after another */
+.film .scene-on .grid article{animation:film-rise .9s cubic-bezier(.16,1,.3,1) both}
+.film .scene-on .grid article:nth-child(2){animation-delay:.12s}
+.film .scene-on .grid article:nth-child(3){animation-delay:.24s}
+.film .scene-on .grid article:nth-child(4){animation-delay:.36s}
+.film #projects .grid article{min-height:0}
+@keyframes film-rise{from{opacity:0;transform:translateY(28px)}}
+
+/* contact: the footer as a closing title card */
+.film footer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.film footer>a{font-size:clamp(30px,5.2vw,72px);font-stretch:110%;font-weight:760;letter-spacing:-.04em;line-height:1;color:var(--text)}
+.film footer>a:hover{color:var(--accent)}
+.film footer p{margin:0;font-size:16px}
+.film footer:before{content:"Let's build something reliable.";font-family:var(--font);font-size:clamp(15px,1.4vw,19px);color:var(--muted);letter-spacing:-.01em}
+.film .scene-on.film-footer>*,.film footer.scene-on>*,.film footer.scene-on:before{animation:film-rise 1s cubic-bezier(.16,1,.3,1) both}
+.film footer.scene-on>:nth-child(1){animation-delay:.1s}.film footer.scene-on>:nth-child(2){animation-delay:.22s}.film footer.scene-on>:nth-child(3){animation-delay:.34s}.film footer.scene-on>:nth-child(4){animation-delay:.46s}
+
+/* the intro is the opening scene; keep it above the page but under the controls */
+.film .intro{z-index:60}
+
+/* ---------- controls ---------- */
+.film-bar{position:fixed;z-index:80;left:0;right:0;bottom:0;display:flex;align-items:center;gap:14px;height:64px;padding:0 max(16px,calc((100vw - 1100px) / 2));background:#0a0a0cf0;border-top:1px solid #ffffff12;color:#f5f5f7;font:600 13px/1 var(--font)}
+.film-bar button{display:grid;place-items:center;flex:none;width:40px;height:40px;border:0;border-radius:10px;background:none;color:inherit;cursor:pointer;transition:background .2s,transform .2s cubic-bezier(.22,.8,.24,1)}
+.film-bar button:hover{background:#ffffff14}
+.film-bar button:active{transform:scale(.94)}
+.film-bar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.film-bar svg{width:18px;height:18px;fill:currentColor}
+.film-bar .fb-play .i-play{display:none}
+.film-bar.paused .fb-play .i-play{display:block}
+.film-bar.paused .fb-play .i-pause{display:none}
+.fb-track{flex:1;display:flex;gap:5px;min-width:0;height:40px;align-items:center}
+.fb-seg{position:relative;flex:var(--w,1) 1 0;min-width:10px;height:40px;padding:0;border:0;background:none;cursor:pointer}
+.fb-seg:before,.fb-seg i{content:"";position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1.5px;border-radius:3px;background:#ffffff22}
+.fb-seg i{background:var(--accent);transform-origin:left;transform:scaleX(var(--k,0))}
+.fb-seg.done i{--k:1}
+.fb-seg:hover:before{background:#ffffff40}
+.fb-seg:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.fb-seg span{position:absolute;left:0;right:0;bottom:-2px;font-size:10.5px;font-weight:600;color:#8d8aa3;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .3s}
+.fb-seg.on span,.fb-seg:hover span{color:#f5f5f7}
+.fb-label{flex:none;min-width:96px;text-align:right;color:#c9c6dc;font-weight:600}
+@media (max-width:700px){
+  .film-bar{gap:6px;padding:0 10px;height:60px}
+  .film-bar button{width:38px;height:38px}
+  .fb-seg span{display:none}
+  .fb-label{min-width:0;font-size:12px}
+  .film main>section{padding:24px 20px 92px}
+  .film .journey-rail{bottom:78px!important}
+}
+
+/* reduced motion: the film starts paused, scenes swap without travel, long scenes scroll by hand */
+@media (prefers-reduced-motion:reduce){
+  .film-ready .scene-on,.film-ready .scene-off{animation:none!important}
+  .film-ready .scene-off{visibility:hidden}
+  .film main>section{overflow-y:auto}
+  .film main>section>*{translate:none}
+}
+
+/* scenes that fit sit centred on the screen; taller ones start at the top and pan */
+.film #projects,.film #skills,.film #experience{display:flex;flex-direction:column}
+.film #experience{display:grid}
+.film #projects>:first-child,.film #skills>:first-child{margin-top:auto}
+.film #projects>:last-child,.film #skills>:last-child{margin-bottom:auto}
+
+/* progress segments share the bar's width (they are buttons, but not icon buttons) */
+.film-bar .fb-seg{display:block;flex:1 1 0;width:auto;min-width:8px;height:40px;border-radius:4px}
+.film-bar .fb-seg:hover{background:none}
