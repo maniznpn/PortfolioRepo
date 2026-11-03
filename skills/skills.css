@@ -3,7 +3,7 @@
 
 /* icon tile: a logo (masked so it can take any colour), a text badge, or a simple glyph */
 .sk-ico{position:relative;flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:12px;background:#ffffff0b;color:var(--muted);transition:background .3s,color .3s,transform .4s var(--pop)}
-.sk-ico i{font:700 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:normal;letter-spacing:-.02em;color:currentColor}
+.sk-ico i{font:700 12px/1 var(--font);font-style:normal;letter-spacing:-.02em;color:currentColor}
 .sk-ico.has-logo i{display:none}
 .sk-ico.has-logo:before{content:"";width:24px;height:24px;background:currentColor;-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat}
 .sk-ico.glyph svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -47,7 +47,7 @@
 .js-skills .sk-card.in .sk-count{animation:sk-pop .5s var(--pop) .1s both}
 @keyframes sk-pop{from{transform:scale(0)}}
 
-@media (prefers-color-scheme:light){.sk-ico{background:#17171a0a}.mq-item{background:#ffffffa8}}
+
 @media (max-width:760px){.sk-grid{grid-template-columns:1fr!important}}
 @media (max-width:700px){.sk-name{font-size:13px}.mq-item{font-size:13px}}
 @media (prefers-reduced-motion:reduce){.skills *,.skills *:before{animation:none!important;transition:none!important}.js-skills .sk-card,.js-skills .sk-card .sk{opacity:1;transform:none}.mq-row{overflow-x:auto}}

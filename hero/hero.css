@@ -39,7 +39,7 @@
 /* facts */
 .hero-facts{display:flex;flex-wrap:wrap;gap:28px;margin:34px 0 0;padding:0;list-style:none}
 .hero-facts li{display:flex;flex-direction:column;gap:2px}
-.hero-facts b{font:650 20px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.03em;color:var(--text)}
+.hero-facts b{font:650 20px/1.2 var(--font);letter-spacing:-.03em;color:var(--text)}
 .hero-facts span{font-size:13px;color:var(--muted)}
 
 /* ---------- request tracer ---------- */
@@ -48,7 +48,7 @@
 .tr-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;font:500 13px/1 "SFMono-Regular",Consolas,monospace}
 .tr-verb{padding:5px 7px;border-radius:5px;background:#c3b5ff22;color:var(--accent);font-weight:700}
 .tr-path{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tr-send{margin-left:auto;flex:none;padding:8px 11px;border:1px solid var(--border);border-radius:8px;background:none;color:var(--text);font:650 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;transition:background .2s,transform .2s var(--ease)}
+.tr-send{margin-left:auto;flex:none;padding:8px 11px;border:1px solid var(--border);border-radius:8px;background:none;color:var(--text);font:650 12px var(--font);cursor:pointer;transition:background .2s,transform .2s var(--ease)}
 .tr-send:hover{background:#c3b5ff22}.tr-send:active{transform:scale(.96)}
 .tr-steps{position:relative;list-style:none;margin:0;padding:0 0 0 26px}
 .tr-steps:before,.tr-steps:after{content:"";position:absolute;left:5px;top:10px;bottom:10px;width:2px;border-radius:2px;background:var(--border)}
@@ -81,7 +81,7 @@
 .hero-cue:hover{color:var(--text)}
 @keyframes h-cue{from{transform:translateY(-12px)}to{transform:translateY(30px)}}
 
-@media (prefers-color-scheme:light){.tr-card{background:#ffffffa8;box-shadow:0 20px 50px #3332}.hero-light:before{background:radial-gradient(closest-side,#c3b5ff55,transparent)}}
+
 @media (max-width:900px){.hero{grid-template-columns:1fr;gap:48px}.tracer{max-width:560px}}
 @media (max-width:700px){.hero{padding:56px 0 100px}.hero-facts{gap:20px}.hero-facts b{font-size:18px}.tr-card{padding:18px 16px 14px}.tr-what{font-size:11px}}
 @media (prefers-reduced-motion:reduce){.hero *,.hero *:before,.hero *:after{animation:none!important;transition:none!important}.tr-card{transform:none}}
