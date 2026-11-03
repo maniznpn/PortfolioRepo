@@ -24,5 +24,10 @@
   addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.classList.contains('open')) { set(false); btn.focus(); } });
   addEventListener('pointerdown', (e) => { if (panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)) set(false); });
   addEventListener('scroll', () => { if (panel.classList.contains('open')) set(false); }, { passive: true });
+  // transparent over the hero, black after the first scroll
+  const root = document.documentElement;
+  let solid = null;
+  const paint = () => { const s = scrollY > 8; if (s !== solid) { solid = s; root.classList.toggle('nav-solid', s); } };
+  addEventListener('scroll', paint, { passive: true }); paint();
   matchMedia('(min-width: 701px)').addEventListener('change', (m) => { if (m.matches) set(false); });
 })();

@@ -22,3 +22,14 @@ a,button{-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){.nav-panel,.nav-panel a,.nav-toggle i:before,.nav-toggle i:after{transition:none!important;animation:none!important}}
 /* touch screens wider than a phone: give the header links a thumb-sized hit area */
 @media (hover:none) and (min-width:701px){header nav a{padding:12px 4px}}
+
+/* header: transparent over the hero on arrival, solid black once the page scrolls */
+.js-nav header{transition:background-color .35s ease,border-color .35s ease}
+.js-nav:not(.nav-solid) header{background:transparent;border-bottom-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.nav-solid header{background:#000;border-bottom-color:#ffffff14;-webkit-backdrop-filter:none;backdrop-filter:none}
+.nav-solid header nav,.nav-solid header nav a,.nav-solid .nav-toggle{color:#f5f5f7}
+.nav-solid header nav a{color:#c9c6dc}
+.nav-solid header nav a:hover{color:#f5f5f7}
+.nav-solid .nav-panel{background:#000;border-bottom-color:#ffffff14}
+.nav-solid .nav-panel a{color:#f5f5f7;border-bottom-color:#ffffff14}
+.nav-solid .nav-panel a:last-child{color:var(--accent)}
