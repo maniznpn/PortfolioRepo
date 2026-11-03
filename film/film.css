@@ -105,3 +105,33 @@ html.film,html.film body{height:100%;overflow:hidden;overscroll-behavior:none}
 /* progress segments share the bar's width (they are buttons, but not icon buttons) */
 .film-bar .fb-seg{display:block;flex:1 1 0;width:auto;min-width:8px;height:40px;border-radius:4px}
 .film-bar .fb-seg:hover{background:none}
+
+/* side arrows: quiet glass circles at the screen's edges, on every scene */
+.film-arrows button{position:fixed;z-index:70;top:calc(50% + 4px);display:grid;place-items:center;width:46px;height:46px;margin-top:-23px;padding:0;border:1px solid #ffffff24;border-radius:50%;background:#ffffff0d;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#f5f5f7;opacity:.6;cursor:pointer;transition:opacity .25s,background .25s,border-color .25s,transform .25s cubic-bezier(.22,.8,.24,1)}
+.film-arrows .fa-prev{left:14px}.film-arrows .fa-next{right:14px}
+.film-arrows button:hover{opacity:1;background:#ffffff1f;border-color:#c3b5ff80}
+.film-arrows .fa-prev:hover{transform:translateX(-2px)}.film-arrows .fa-next:hover{transform:translateX(2px)}
+.film-arrows button:active{transform:scale(.94)}
+.film-arrows button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;opacity:1}
+.film-arrows svg{width:20px;height:20px;fill:currentColor}
+.film-arrows{display:none}.film-ready .film-arrows{display:block}
+.intro-on:not(.intro-out) .film-arrows{opacity:0;pointer-events:none}
+/* keep scene content clear of the arrows */
+.film main>section{padding-left:max(80px,calc((100vw - 1100px) / 2));padding-right:max(80px,calc((100vw - 1100px) / 2))}
+.film.js-journey .journey-captions,.film.js-journey .journey-rail{left:max(80px,4.5vw)!important}
+
+/* QA pass */
+.film .hero-cue{display:none}
+@media (max-height:820px){
+  .film main>section.hero{padding-top:28px;padding-bottom:84px}
+  .film .hero h1{font-size:clamp(40px,min(5.2vw,8vh),74px)!important}
+  .film .hero-actions{margin-top:22px}
+  .film .hero-facts{margin-top:22px}
+  .film .hero p{font-size:16px}
+}
+.film-bar{gap:10px}
+@media (max-width:1180px){.film .hero h1{font-size:clamp(38px,4.6vw,56px)!important}.film .hero{column-gap:40px}}
+
+/* paused by a scroll or click: the play button breathes softly — the film carries on in a moment */
+.film-bar.waiting .fb-play{animation:fb-wait 1.6s ease-in-out infinite}
+@keyframes fb-wait{50%{background:#c3b5ff26}}

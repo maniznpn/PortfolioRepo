@@ -1,0 +1,60 @@
+<section id="message" class="msg" aria-labelledby="msg-title">
+<div class="msg-intro">
+<small>SAY HELLO</small>
+<h2 id="msg-title">Got something to say?</h2>
+<p class="msg-sub">A personal note or a business enquiry, it lands straight in my inbox. I usually reply within a day.</p>
+<ol class="msg-dots" aria-hidden="true"><li></li><li></li><li></li><li></li></ol>
+<button type="button" class="msg-skip">Skip for now <span aria-hidden="true">→</span></button>
+</div>
+
+<form class="msg-form" novalidate>
+<input type="checkbox" name="botcheck" class="msg-bot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+<fieldset class="msg-step" data-step="0">
+<legend class="msg-q">What's this about?</legend>
+<div class="msg-chips">
+<label class="msg-chip"><input type="radio" name="topic" value="Business enquiry" required><span>Business enquiry</span></label>
+<label class="msg-chip"><input type="radio" name="topic" value="Personal message"><span>Personal message</span></label>
+<label class="msg-chip"><input type="radio" name="topic" value="Just saying hi"><span>Just saying hi</span></label>
+</div>
+</fieldset>
+
+<div class="msg-step" data-step="1">
+<label class="msg-q" for="m-name">What should I call you?</label>
+<input class="msg-in" id="m-name" name="name" type="text" autocomplete="name" placeholder="Your name" required maxlength="80">
+</div>
+
+<div class="msg-step" data-step="2">
+<label class="msg-q" for="m-email">Where can I reply?</label>
+<input class="msg-in" id="m-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required maxlength="120">
+</div>
+
+<div class="msg-step" data-step="3">
+<label class="msg-q" for="m-text">What's on your mind?</label>
+<textarea class="msg-in msg-area" id="m-text" name="message" rows="4" placeholder="Write as much or as little as you like…" required maxlength="4000" aria-describedby="m-hint"></textarea>
+<p class="msg-hint" id="m-hint">Ctrl/⌘ + Enter to send</p>
+</div>
+
+<p class="msg-err" role="alert" aria-live="assertive"></p>
+<div class="msg-nav">
+<button type="button" class="msg-back">← Back</button>
+<button type="button" class="msg-next">Continue <kbd>Enter ↵</kbd></button>
+<button type="submit" class="msg-send">Send message ↗</button>
+</div>
+</form>
+
+<div class="msg-flight" aria-hidden="true">
+<div class="mf-node mf-you">You</div>
+<div class="mf-line"><span class="mf-packet"></span></div>
+<div class="mf-node mf-api">Web3Forms</div>
+<div class="mf-line"><span class="mf-packet"></span></div>
+<div class="mf-node mf-inbox">Manish's inbox</div>
+</div>
+
+<div class="msg-done" role="status" aria-live="polite" hidden>
+<p class="msg-code"><b>200 OK</b> · delivered</p>
+<h3 class="msg-thanks">Thanks, <span class="msg-who">friend</span>.</h3>
+<p>Your message is in my inbox. I'll reply to <span class="msg-mail">you</span> soon.</p>
+<button type="button" class="msg-again">Send another</button>
+</div>
+</section>

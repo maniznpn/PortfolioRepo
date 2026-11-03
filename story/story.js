@@ -30,7 +30,7 @@
     [['relaxed', 0]]                                     // shipped
   ];
   // how long a screen holds before autoplay moves on (ms, counted from when it arrived)
-  const DWELL = [2800, 2800, 3600, 3000, 2800, 3300, 4000];
+  const DWELL = [3900, 3900, 4900, 4200, 3900, 4600, 5400];
 
   // split each title into words so they can rise out of a mask
   track.querySelectorAll('.journey-captions h3').forEach((h) => {
@@ -40,7 +40,7 @@
   });
 
   let stage = -2, enteredAt = 0, beatTimers = [], queued = false, listening = false;
-  let auto = !reduce.matches, autoT = 0, autoScrolling = false, idleT = 0;
+  let auto = false, autoT = 0, autoScrolling = false, idleT = 0;
 
   const metrics = () => {
     const H = pin.offsetHeight;
@@ -153,7 +153,7 @@
     track.style.setProperty('--f', 0); track.style.setProperty('--fa', 0);
     window.FilmJourney = {
       count: LAST + 1,
-      dwell: DWELL.concat([3600]),
+      dwell: DWELL.concat([4800]),
       go(s, force) {
         s = Math.max(0, Math.min(LAST, s));
         track.style.setProperty('--p', (s / LAST).toFixed(4));
@@ -163,6 +163,19 @@
     enter(0);
     return;
   }
+
+  /* ---------- arrows: step the stages by hand ---------- */
+  const nav = document.createElement('div');
+  nav.className = 'journey-arrows';
+  nav.innerHTML = '<button type="button" class="ja-prev" aria-label="Previous stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg></button>' +
+    '<button type="button" class="ja-next" aria-label="Next stage"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></button>';
+  pin.appendChild(nav);
+  nav.querySelector('.ja-prev').addEventListener('click', () => { cancelAuto(); glideTo(Math.max(0, stage) - 1); });
+  nav.querySelector('.ja-next').addEventListener('click', () => {
+    cancelAuto();
+    if (stage >= LAST) { skip.click(); return; }
+    glideTo(Math.max(0, stage) + 1);
+  });
 
   /* ---------- wiring ---------- */
   const inputs = ['wheel', 'touchstart', 'keydown', 'pointerdown'];

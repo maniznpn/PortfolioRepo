@@ -405,3 +405,55 @@ html:not(.js-journey) .journey-captions li{padding-bottom:22px}
   .scene:after{opacity:0}
   .particles{display:none}
 }
+
+/* scroll mode (phones and tablets): the reader drives the story by scrolling; no autoplay control */
+html:not(.film) .journey-auto{display:none!important}
+
+/* smooth stage changes: the old caption dissolves while the new one settles in, poses and camera glide */
+.js-journey .journey-captions li{transition:visibility 0s linear .75s}
+.js-journey .journey-captions li>*{transform:translateY(-10px);filter:blur(6px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1),filter .7s ease}
+.js-journey [data-stage="0"] li[data-s="0"],.js-journey [data-stage="1"] li[data-s="1"],.js-journey [data-stage="2"] li[data-s="2"],.js-journey [data-stage="3"] li[data-s="3"],.js-journey [data-stage="4"] li[data-s="4"],.js-journey [data-stage="5"] li[data-s="5"],.js-journey [data-stage="6"] li[data-s="6"],.js-journey [data-stage="7"] li[data-s="7"]{transition-delay:0s}
+.js-journey [data-stage="0"] li[data-s="0"]>*,.js-journey [data-stage="1"] li[data-s="1"]>*,.js-journey [data-stage="2"] li[data-s="2"]>*,.js-journey [data-stage="3"] li[data-s="3"]>*,.js-journey [data-stage="4"] li[data-s="4"]>*,.js-journey [data-stage="5"] li[data-s="5"]>*,.js-journey [data-stage="6"] li[data-s="6"]>*,.js-journey [data-stage="7"] li[data-s="7"]>*{transform:none;filter:none;animation:cap-in 1.4s cubic-bezier(.22,1,.36,1) .45s both}
+.js-journey .journey-captions li>:nth-child(2){animation-delay:.75s!important}
+.js-journey .journey-captions li>:nth-child(3){animation-delay:.95s!important}
+.js-journey [data-stage] li .jw>span{animation-duration:1.4s!important;animation-timing-function:cubic-bezier(.22,1,.36,1)!important}
+.js-journey [data-stage="0"] li[data-s="0"] .jw>span,.js-journey [data-stage="1"] li[data-s="1"] .jw>span,.js-journey [data-stage="2"] li[data-s="2"] .jw>span,.js-journey [data-stage="3"] li[data-s="3"] .jw>span,.js-journey [data-stage="4"] li[data-s="4"] .jw>span,.js-journey [data-stage="5"] li[data-s="5"] .jw>span,.js-journey [data-stage="6"] li[data-s="6"] .jw>span,.js-journey [data-stage="7"] li[data-s="7"] .jw>span{animation-delay:calc(.45s + var(--i) * .1s)!important}
+.cam{transition:transform 2.8s cubic-bezier(.45,0,.2,1)}
+.pose{transition:opacity 1.5s cubic-bezier(.4,0,.2,1),transform 2.4s cubic-bezier(.22,1,.36,1)}
+.scr{transition:opacity .9s ease,clip-path 1.4s cubic-bezier(.45,0,.2,1)}
+.term{transition:opacity .9s ease,transform 1.2s cubic-bezier(.22,1,.36,1)}
+.sky{transition:opacity 2.4s ease}
+.tint{transition:opacity 1.4s ease}
+.cut .scene:before{animation:sweep 2.2s cubic-bezier(.45,0,.2,1)}
+@keyframes sweep{0%{opacity:0;transform:translateX(0)}30%{opacity:.7}100%{opacity:0;transform:translateX(560%)}}
+
+/* stage arrows (scroll mode) */
+.journey-arrows button{position:absolute;z-index:5;top:50%;display:grid;place-items:center;width:42px;height:42px;margin-top:-21px;padding:0;border:1px solid #ffffff2a;border-radius:50%;background:#0a0a0c40;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#f5f5f7;opacity:calc(.75 - var(--fa,0));cursor:pointer;transition:background .25s,border-color .25s,transform .2s}
+.journey-arrows .ja-prev{left:10px}.journey-arrows .ja-next{right:10px}
+.journey-arrows button:hover{background:#ffffff1f;border-color:#c3b5ff80}
+.journey-arrows button:active{transform:scale(.94)}
+.journey-arrows button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.journey-arrows svg{width:19px;height:19px;fill:currentColor}
+[data-stage="0"] .ja-prev{opacity:.25;pointer-events:none}
+[data-pre] .journey-arrows{display:none}
+.film .journey-arrows{display:none}
+
+/* QA pass: captions never collide with the monitor; rail labels fit */
+@media (min-aspect-ratio:5/4){
+  .js-journey .journey-rail{width:clamp(340px,27vw,400px)}
+  .journey-rail button{font-size:11.5px}
+  .journey-pin:after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,#0a0b1ccc 0,#0a0b1c99 22%,transparent 42%)}
+}
+@media (min-aspect-ratio:5/4) and (max-width:1280px){
+  .journey-captions h3{font-size:clamp(34px,4.3vw,56px)}
+  .journey-captions p{font-size:16px;max-width:250px}
+  .js-journey .journey-captions{width:min(24vw,300px)}
+}
+/* phones and tablets: stage arrows sit low beside the character, clear of the floating cards */
+@media (max-aspect-ratio:5/4){
+  .journey-arrows button{top:auto;bottom:44px;margin-top:0}
+  .journey-arrows .ja-prev{left:auto;right:62px}
+  .journey-arrows .ja-next{right:14px}
+}
+/* comfortable touch targets */
+@media (hover:none){.js-journey .journey-skip{min-height:44px}.journey-arrows button{width:46px;height:46px}}

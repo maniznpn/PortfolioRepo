@@ -39,3 +39,9 @@ html:not(.film) .key:after{transform:none}
   .key:after{transform:none}
   .tcur{display:none}
 }
+
+/* QA pass */
+.tw{white-space:nowrap}
+/* outside the film the key-term underlines sit quieter, so they don't read as links */
+html:not(.film) .key:after{opacity:.45}
+html:not(.film) .hero p .key:after{display:none}

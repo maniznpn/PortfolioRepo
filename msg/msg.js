@@ -26,8 +26,18 @@ const FALLBACK_EMAIL = 'neupanem01@gmail.com';
   });
 
   // while someone is writing, hold the film on this scene
-  const hold = () => { if (window.Film) window.Film.pause(); };
+  const hold = () => { if (window.Film) window.Film.hold(true); };
   form.addEventListener('focusin', hold); form.addEventListener('input', hold);
+  // done with the form: the film may carry on after a quiet moment
+  form.addEventListener('focusout', () => setTimeout(() => { if (!form.contains(document.activeElement) && window.Film) window.Film.hold(false); }, 0));
+
+  // not writing today: move on without sending anything
+  sec.querySelector('.msg-skip').addEventListener('click', () => {
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    if (window.Film && window.Film.next) { window.Film.next(); return; }
+    const nxt = sec.nextElementSibling || document.querySelector('footer');
+    if (nxt) scrollTo({ top: nxt.getBoundingClientRect().top + scrollY - 72, behavior: 'smooth' });
+  });
 
   function go(i, focus = true) {
     at = Math.max(0, Math.min(steps.length - 1, i));

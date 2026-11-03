@@ -33,3 +33,4 @@ a,button{-webkit-tap-highlight-color:transparent}
 .nav-solid .nav-panel{background:#000;border-bottom-color:#ffffff14}
 .nav-solid .nav-panel a{color:#f5f5f7;border-bottom-color:#ffffff14}
 .nav-solid .nav-panel a:last-child{color:var(--accent)}
+html:not(.film) main>section{scroll-margin-top:64px}html:not(.film) #journey{scroll-margin-top:0}

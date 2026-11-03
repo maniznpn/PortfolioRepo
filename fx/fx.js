@@ -27,7 +27,11 @@
     if (!el || el.dataset.fx) return;
     const text = el.textContent.trim();
     el.dataset.fx = 'type'; el.setAttribute('aria-label', text);
-    el.innerHTML = [...text].map((c, i) => `<span class="tc" aria-hidden="true" style="--c:${i}">${c === ' ' ? '&nbsp;' : esc(c)}</span>`).join('') + `<span class="tcur" aria-hidden="true" style="--c:${text.length}"></span>`;
+    let n = 0; // characters grouped per word, so a tag wraps between words, never inside one
+    el.innerHTML = text.split(' ').map((w) => {
+      const word = `<span class="tw">${[...w].map((c) => `<span class="tc" aria-hidden="true" style="--c:${n++}">${esc(c)}</span>`).join('')}</span>`;
+      n++; return word;
+    }).join(' ') + `<span class="tcur" aria-hidden="true" style="--c:${text.length}"></span>`;
   }
   // a single line → letters that resolve from the centre outward
   function centre(el) {
@@ -56,6 +60,11 @@
     const t = document.createElement('p'); t.className = 'ft-tag'; t.textContent = "Let's build something reliable.";
     foot.prepend(t); words(t);
     centre(foot.querySelector(':scope > a'));
+  }
+  // without the film (phones, tablets), each section plays its entrance the first time it scrolls into view
+  if (!document.documentElement.classList.contains('film') && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('scene-on'); io.unobserve(e.target); } }), { threshold: 0.18 });
+    document.querySelectorAll('main > section:not(#journey), footer').forEach((s) => io.observe(s));
   }
   document.documentElement.classList.add('fx-ready');
 })();

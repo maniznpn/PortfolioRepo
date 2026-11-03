@@ -88,3 +88,14 @@
 }
 @media (max-width:520px){.msg-chip span{min-height:48px;padding:0 16px;font-size:15px}.msg-nav kbd{display:none}}
 @media (prefers-reduced-motion:reduce){.msg *{animation:none!important;transition:none!important}}
+
+/* skip: an easy way past the form without sending */
+.msg-skip{display:inline-flex;align-items:center;gap:8px;margin-top:26px;padding:10px 16px;border:1px solid var(--border);border-radius:999px;background:none;color:var(--muted);font:600 14px/1 var(--font);cursor:pointer;transition:color .2s,border-color .2s,transform .2s var(--ease)}
+.msg-skip:hover{color:var(--text);border-color:var(--accent)}
+.msg-skip:hover span{transform:translateX(3px)}
+.msg-skip span{transition:transform .2s var(--ease)}
+.msg-skip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.scene-on.msg .msg-skip{animation:fx-focus .6s var(--ease) .4s both}
+@media (max-width:900px){.msg-skip{margin-top:16px}}
+
+@media (hover:none){.msg-skip{min-height:44px}}

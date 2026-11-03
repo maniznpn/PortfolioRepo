@@ -116,3 +116,14 @@ html.intro-out .intro-inner{transform:translateY(-60px) scale(.96);opacity:0}
 @keyframes h-fade{from{opacity:0}}
 /* the hero waits under the intro and starts its entrance as the intro leaves */
 html.intro-on:not(.intro-out) .hero,html.intro-on:not(.intro-out) .hero *{animation-play-state:paused!important}
+
+/* description: words come into focus one after another, like subtitles; key terms light up last */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.hero p.split{animation:none}
+.hero p .dw{display:inline-block;animation:h-desc-in .9s cubic-bezier(.16,1,.3,1) calc(.7s + var(--i) * .032s) both}
+.hero p .dw.key{animation:h-desc-in .9s cubic-bezier(.16,1,.3,1) calc(.7s + var(--i) * .032s) both,h-key-on .8s ease calc(2.2s + var(--i) * .02s) both}
+@keyframes h-desc-in{from{opacity:0;filter:blur(8px);transform:translateY(.45em)}to{opacity:1;filter:blur(0);transform:none}}
+@keyframes h-key-on{from{color:var(--muted)}to{color:var(--text)}}
+@media (prefers-reduced-motion:reduce){.hero p .dw.key{color:var(--text)}}
+
+@media (hover:none){.tr-send{min-height:40px;padding-left:14px;padding-right:14px}}
