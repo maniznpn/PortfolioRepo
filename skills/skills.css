@@ -1,0 +1,53 @@
+/* Technical skills — a moving band of the stack, then each group's tools popping in. */
+.skills{--ease:cubic-bezier(.22,.8,.24,1);--pop:cubic-bezier(.2,1.3,.4,1)}
+
+/* icon tile: a logo (masked so it can take any colour), a text badge, or a simple glyph */
+.sk-ico{position:relative;flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:12px;background:#ffffff0b;color:var(--muted);transition:background .3s,color .3s,transform .4s var(--pop)}
+.sk-ico i{font:700 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-style:normal;letter-spacing:-.02em;color:currentColor}
+.sk-ico.has-logo i{display:none}
+.sk-ico.has-logo:before{content:"";width:24px;height:24px;background:currentColor;-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat}
+.sk-ico.glyph svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sk-ico.sm{width:30px;height:30px;border-radius:8px}
+.sk-ico.sm.has-logo:before,.sk-ico.sm svg{width:16px;height:16px}
+.sk-ico.sm i{font-size:10px}
+
+/* band: two rows drifting in opposite directions, faded at the edges, paused on hover */
+.sk-band{display:grid;gap:10px;margin:0 0 28px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.mq-row{overflow:hidden}
+.mq-track{display:flex;gap:10px;width:max-content;animation:sk-marquee 46s linear infinite}
+.mq-row.rev .mq-track{animation-direction:reverse;animation-duration:52s}
+.sk-band:hover .mq-track{animation-play-state:paused}
+.mq-item{display:inline-flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border:1px solid var(--border);border-radius:12px;background:#ffffff06;color:var(--text);font-size:14px;font-weight:550;white-space:nowrap;transition:border-color .3s}
+.mq-item:hover{border-color:color-mix(in srgb,var(--c) 55%,transparent)}
+.mq-item:hover .sk-ico{color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
+@keyframes sk-marquee{to{transform:translateX(-50%)}}
+
+/* group cards */
+.sk-grid{grid-template-columns:1fr 1fr!important;align-items:start}
+.sk-card{position:relative;overflow:hidden;min-height:0!important;padding:20px 20px 18px!important}
+.sk-card:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(380px circle at var(--cx,50%) var(--cy,0%),#c3b5ff12,transparent 60%);opacity:0;transition:opacity .3s}
+.sk-card:hover:before{opacity:1}
+.sk-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sk-count{display:grid;place-items:center;min-width:26px;height:26px;padding:0 8px;border-radius:13px;background:#c3b5ff1c;color:var(--accent);font-size:12px;font-weight:650}
+.sk-list{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.sk{display:inline-flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;border:1px solid var(--border);border-radius:11px;background:#ffffff05;cursor:default;transition:background .3s,border-color .3s,transform .35s var(--ease)}
+.sk .sk-ico{width:32px;height:32px;border-radius:8px}
+.sk .sk-ico.has-logo:before,.sk .sk-ico svg{width:18px;height:18px}
+.sk .sk-ico i{font-size:10px}
+.sk-name{font-size:13.5px;font-weight:550;line-height:1.2;color:var(--text);white-space:nowrap}
+.sk:hover{background:#ffffff0a;border-color:color-mix(in srgb,var(--c) 55%,transparent);transform:translateY(-3px)}
+.sk:hover .sk-ico{color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent);transform:scale(1.06) rotate(-4deg)}
+
+/* arrival: tiles pop in one after another (only when the script runs) */
+.js-skills .sk-card{opacity:0;transform:translateY(24px)}
+.js-skills .sk-card.in{opacity:1;transform:none;transition:opacity .6s var(--ease),transform .7s var(--ease)}
+.js-skills .sk-card .sk{opacity:0;transform:scale(.7) translateY(10px)}
+.js-skills .sk-card.in .sk{opacity:1;transform:none;transition:opacity .4s var(--ease) calc(.15s + var(--i) * .06s),transform .55s var(--pop) calc(.15s + var(--i) * .06s),background .3s}
+.js-skills .sk-card.in .sk:hover{transform:translateY(-3px);transition-delay:0s}
+.js-skills .sk-card.in .sk-count{animation:sk-pop .5s var(--pop) .1s both}
+@keyframes sk-pop{from{transform:scale(0)}}
+
+@media (prefers-color-scheme:light){.sk-ico{background:#17171a0a}.mq-item{background:#ffffffa8}}
+@media (max-width:760px){.sk-grid{grid-template-columns:1fr!important}}
+@media (max-width:700px){.sk-name{font-size:13px}.mq-item{font-size:13px}}
+@media (prefers-reduced-motion:reduce){.skills *,.skills *:before{animation:none!important;transition:none!important}.js-skills .sk-card,.js-skills .sk-card .sk{opacity:1;transform:none}.mq-row{overflow-x:auto}}

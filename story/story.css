@@ -1,0 +1,389 @@
+/* Developer Journey — full-screen scroll story.
+   One screen per stage. story.js sets data-stage / data-pose / data-late on .journey-track, plus
+   --p (0–1 through the story) and --fa (0–.5, how far the reader has scrolled away from the current screen).
+   Each screen plays its own timed animation when it arrives. Transform + opacity only. */
+
+.journey{--ease:cubic-bezier(.22,.8,.24,1);--pop:cubic-bezier(.2,1.3,.4,1);--x-ink:#e9e6f5;--x-dim:#8d8aa3;--x-ok:#7ee0a6;--x-err:#ff7a7a;--x-warn:#ffcf6b;--x-key:#c3b5ff;--x-type:#8fd3c7;--x-str:#f1c27d;--x-fn:#9cc4ff;--wall:#131846;--pin-h:calc(100vh - 72px);padding-bottom:0}
+body{overflow-x:clip}
+@supports (height:100svh){.journey{--pin-h:calc(100svh - 72px)}}
+.journey-head p{max-width:520px;margin:-24px 0 0}
+
+/* ---------- track & full-bleed pin ---------- */
+.journey-track{position:relative;margin-top:56px}
+.js-journey .journey-track{height:calc(var(--pin-h) * 8)}
+.journey-pin{position:relative;width:100vw;margin-left:calc(50% - 50vw);background:var(--wall);color:var(--x-ink)}
+.js-journey .journey-pin{position:sticky;top:72px;height:var(--pin-h);overflow:hidden}
+
+/* ---------- captions: one per screen, popped in on arrival ---------- */
+.journey-captions{list-style:none;margin:0;padding:0;position:relative;z-index:3}
+.journey-captions h3{font-size:clamp(40px,5.4vw,84px);line-height:.95;letter-spacing:-.06em;margin:0 0 18px;color:#f5f5f7}
+.journey-captions p{font-size:clamp(17px,1.35vw,21px);line-height:1.45;margin:0;color:#c9c6dc;max-width:400px}
+.journey-captions .journey-final{color:#f5f5f7;font-size:clamp(22px,2vw,30px);line-height:1.25;letter-spacing:-.03em;max-width:460px}
+.journey-cta{display:inline-block;margin-top:26px;padding:12px 16px;border-radius:8px;font-size:14px;font-weight:650;background:#f5f5f5;color:#080808;transition:transform .2s var(--ease),background .2s}
+.journey-cta:hover{transform:translateY(-2px);background:var(--accent)}
+.journey-cta:focus-visible,.journey-rail button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.js-journey .journey-captions{position:absolute;display:grid;opacity:calc(1 - var(--fa,0) * 1.7);transform:translateY(calc(var(--f,0) * -70px))}
+.js-journey .journey-captions li{grid-area:1/1;align-self:center;visibility:hidden}
+.js-journey .journey-captions li>*{opacity:0}
+.js-journey [data-stage="0"] li[data-s="0"],.js-journey [data-stage="1"] li[data-s="1"],.js-journey [data-stage="2"] li[data-s="2"],.js-journey [data-stage="3"] li[data-s="3"],.js-journey [data-stage="4"] li[data-s="4"],.js-journey [data-stage="5"] li[data-s="5"],.js-journey [data-stage="6"] li[data-s="6"],.js-journey [data-stage="7"] li[data-s="7"]{visibility:visible}
+.js-journey [data-stage="0"] li[data-s="0"]>*,.js-journey [data-stage="1"] li[data-s="1"]>*,.js-journey [data-stage="2"] li[data-s="2"]>*,.js-journey [data-stage="3"] li[data-s="3"]>*,.js-journey [data-stage="4"] li[data-s="4"]>*,.js-journey [data-stage="5"] li[data-s="5"]>*,.js-journey [data-stage="6"] li[data-s="6"]>*,.js-journey [data-stage="7"] li[data-s="7"]>*{opacity:1;animation:pop-in .75s var(--pop) both}
+.js-journey .journey-captions li>:nth-child(2){animation-delay:.14s!important}
+.js-journey .journey-captions li>:nth-child(3){animation-delay:.28s!important}
+
+[data-pre] .journey-captions,[data-pre] .fx{display:none}
+/* flying past on a fast scroll: hide the text so nothing half-plays */
+[data-fast] .journey-captions,[data-fast] .fx{opacity:0!important;transition:opacity .15s}
+
+/* ---------- stage rail ---------- */
+.journey-rail{display:none}
+.js-journey .journey-rail{position:absolute;z-index:3;display:flex;gap:6px;opacity:calc(1 - var(--fa,0))}
+.journey-rail button{position:relative;flex:1 1 0;min-width:0;padding:12px 0 0;background:none;border:0;color:#8d8aa3;font:500 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-align:left;cursor:pointer;transition:color .3s}
+.journey-rail button:before,.journey-rail button:after{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:3px;background:#ffffff26}
+.journey-rail button:after{background:var(--accent);transform:scaleX(var(--on,0));transform-origin:left;transition:transform .5s var(--ease)}
+.journey-rail button:hover,.journey-rail button[aria-current="step"]{color:#f5f5f7}
+.journey-rail button.done{--on:1}
+
+/* autoplay: the current stage's bar fills while the screen holds, then the story moves on */
+[data-auto] .journey-rail button[aria-current="step"]:after{animation:dwell var(--dwell,4s) linear both}
+@keyframes dwell{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.journey-auto{display:none}
+.js-journey .journey-auto{position:absolute;z-index:4;display:inline-flex;align-items:center;gap:7px;padding:7px 12px 7px 10px;border:0;border-radius:8px;background:#ffffff1f;color:#f5f5f7;font:600 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;opacity:calc(1 - var(--fa,0));transition:background .2s,transform .2s var(--ease)}
+.journey-auto:before{content:"";width:9px;height:10px;background:linear-gradient(90deg,currentColor 0 35%,transparent 0 65%,currentColor 0)}
+.journey-auto[aria-pressed="false"]:before{width:0;height:0;background:none;border-left:9px solid currentColor;border-top:5px solid transparent;border-bottom:5px solid transparent}
+.journey-auto:hover{background:#ffffff33}
+.journey-auto:active{transform:scale(.96)}
+.journey-auto:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* skip: always there, so nobody has to swipe through every screen */
+.journey-skip{display:none}
+.js-journey .journey-skip{position:absolute;z-index:4;top:20px;right:max(24px,4.5vw);display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border:1px solid #ffffff2e;border-radius:8px;background:#0a0a0c99;color:#f5f5f7;font:600 12px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;transition:background .2s,border-color .2s,transform .2s var(--ease)}
+.journey-skip:hover{background:#0a0a0ccc;border-color:var(--accent)}
+.journey-skip:active{transform:scale(.96)}
+.journey-skip:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media (max-width:700px){.js-journey .journey-skip{top:12px;right:16px}.journey-skip .js-long{display:none}}
+
+/* ---------- scene: the room, sized to cover the screen ---------- */
+.scene{position:relative;overflow:hidden;background:var(--wall);container-type:inline-size;isolation:isolate}
+.cam{position:absolute;inset:0;transform-origin:62% 55%;transition:transform 1.4s var(--ease)}
+.layer{position:absolute;inset:0}
+.l-back{transform:translateX(calc(var(--p,0) * -1.6cqw))}
+.l-mid{transform:translateX(calc(var(--p,0) * -.6cqw))}
+.l-front{transform:translateX(calc(var(--p,0) * .8cqw))}
+[data-stage="0"] .cam{transform:scale(1.06) translate(-2%,1%)}
+[data-stage="2"] .cam{transform:scale(1.08) translate(-1%,1%)}
+[data-stage="3"] .cam{transform:scale(1.11) translate(-1.5%,1.5%)}
+[data-stage="4"] .cam{transform:scale(1.05)}
+[data-stage="5"] .cam{transform:scale(1.08) translate(-1%,1%)}
+[data-stage="6"] .cam{transform:scale(1.03)}
+
+/* window & sky */
+.window{position:absolute;border-radius:6px;overflow:hidden;background:#0b0c18;border:.5cqw solid #1c1d2e}
+.sky{position:absolute;inset:0;opacity:0;transition:opacity 1.6s var(--ease)}
+.sky-dusk{background:linear-gradient(#2b2f63,#7a5a8c 60%,#e39a7b)}
+.sky-night{background:linear-gradient(#070915,#141a3c)}
+.sky-dawn{background:linear-gradient(#3b5c9a,#c9a0b8 60%,#ffd3a1)}
+[data-stage="0"] .sky-dusk,[data-stage="1"] .sky-dusk{opacity:1}
+[data-stage="2"] .sky-night,[data-stage="3"] .sky-night,[data-stage="4"] .sky-night,[data-stage="5"] .sky-night{opacity:1}
+[data-stage="6"] .sky-dawn,[data-stage="7"] .sky-dawn{opacity:1}
+.stars i{position:absolute;left:var(--x);top:var(--y);width:.3cqw;height:.3cqw;border-radius:50%;background:#fff;opacity:0;transition:opacity 1.2s}
+[data-stage="2"] .stars i,[data-stage="3"] .stars i,[data-stage="4"] .stars i,[data-stage="5"] .stars i{opacity:.8;animation:twinkle 3s ease-in-out infinite alternate}
+.stars i:nth-child(odd){animation-delay:-1.5s}
+.sun{position:absolute;left:62%;top:70%;width:12%;aspect-ratio:1;border-radius:50%;background:#ffe2b0;opacity:0;transform:translateY(60%);transition:transform 2s var(--ease),opacity 1.6s}
+[data-stage="6"] .sun{opacity:.7;transform:translateY(10%)}
+[data-stage="7"] .sun{opacity:1;transform:translateY(-55%)}
+.range{position:absolute;left:0;bottom:0;width:100%;height:60%}
+.range .far{fill:#3a3c66;transition:fill 1.6s}
+.range .snow{fill:#c9cbe6;opacity:.7}
+.range .near{fill:#1a1b31}
+[data-stage="2"] .range .far,[data-stage="3"] .range .far,[data-stage="4"] .range .far,[data-stage="5"] .range .far{fill:#1f2244}
+.mullion{position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(50% - .25cqw),#1c1d2e 0 calc(50% + .25cqw),transparent 0)}
+
+/* shelf & server */
+.shelf{position:absolute}
+.books{display:flex;align-items:flex-end;gap:.3cqw;height:7cqw;padding-left:.6cqw}
+.books b{display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);width:1.9cqw;height:100%;border-radius:.3cqw;background:#262a4d;color:#b9b6d6;font:600 .85cqw/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.books b:nth-child(2){height:84%;background:#3b2f5e}.books b:nth-child(3){height:94%;background:#1f3550}.books b:nth-child(4){background:#2e2a44}.books b:nth-child(5){height:76%;background:#3a2740}
+.plank{height:.6cqw;border-radius:.2cqw;background:#2a2433;box-shadow:0 .5cqw 0 #ffb86b14}
+.rack{display:flex;gap:.9cqw;align-items:center;margin:1.2cqw 0 0;padding:.9cqw 1.2cqw;width:72%;height:4cqw;border-radius:.5cqw;background:#181a2c}
+.rack span{width:.6cqw;height:.6cqw;border-radius:50%;background:#3a3d5c;transition:background .4s}
+[data-stage="6"] .rack span,[data-stage="7"] .rack span{background:var(--x-ok);animation:blink 1s steps(2) infinite}
+.rack span:nth-child(2){animation-delay:-.3s}.rack span:nth-child(3){animation-delay:-.6s}.rack span:nth-child(4){animation-delay:-.8s}
+
+/* light pools */
+.lamp-light,.screen-light{position:absolute;border-radius:50%;pointer-events:none;transition:opacity 1.2s,background-color .8s}
+.lamp-light{background:radial-gradient(closest-side,#ffb86b,transparent);opacity:.14}
+[data-stage="2"] .lamp-light,[data-stage="3"] .lamp-light,[data-stage="4"] .lamp-light,[data-stage="5"] .lamp-light{opacity:.3}
+.screen-light{--c:#7b6bff;background:radial-gradient(closest-side,var(--c),transparent);opacity:.3}
+[data-stage="3"] .screen-light{--c:#ff4d4d;opacity:.45}
+[data-stage="4"] .screen-light,[data-stage="5"] .screen-light{--c:#3ddc84;opacity:.3}
+[data-stage="6"] .screen-light{--c:#4d8dff;opacity:.36}
+
+/* ---------- monitor ---------- */
+.monitor{position:absolute}
+.bezel{position:relative;padding:.6cqw;border-radius:.9cqw;background:#08080e;border:.15cqw solid #2a2b3d}
+.screen{position:relative;aspect-ratio:16/10;border-radius:.4cqw;overflow:hidden;background:#0d0f1c;color:var(--x-ink);font:500 .98cqw/1.6 "SFMono-Regular",Consolas,monospace}
+.neck{width:7%;height:3.4cqw;margin:0 auto;background:#1b1c2b}
+.foot{width:30%;height:.8cqw;margin:0 auto;border-radius:.4cqw .4cqw 0 0;background:#24253a}
+.ide-bar{display:flex;align-items:center;gap:.45cqw;height:2.1cqw;padding:0 .9cqw;background:#151729;font-size:.85cqw;color:var(--x-dim)}
+.ide-bar i{width:.6cqw;height:.6cqw;border-radius:50%}
+.ide-bar i:nth-child(1){background:#ff6058}.ide-bar i:nth-child(2){background:#ffbd2e}.ide-bar i:nth-child(3){background:#28c940}
+.ide-title{margin-left:1cqw}
+.ide-title:after{content:"Program.cs — Loans"}
+[data-stage="1"] .ide-title:after{content:"Solution Explorer — Loans.sln"}
+[data-stage="2"] .ide-title:after,[data-stage="3"] .ide-title:after,[data-stage="4"] .ide-title:after{content:"LoansController.cs — Loans.Api"}
+[data-stage="5"] .ide-title:after{content:"Test Explorer — Loans.Tests"}
+[data-stage="6"] .ide-title:after{content:"Actions — deploy #128"}
+[data-stage="7"] .ide-title:after{content:"loans.example.np"}
+.scr{position:absolute;inset:2.1cqw 0 0;padding:1.3cqw 1.5cqw;opacity:0;transform:translateY(1cqw);transition:opacity .6s var(--ease),transform .7s var(--ease)}
+[data-stage="0"] .scr-idle,[data-stage="1"] .scr-plan,[data-stage="2"] .scr-code,[data-stage="3"] .scr-code,[data-stage="4"] .scr-code,[data-stage="5"] .scr-test,[data-stage="6"] .scr-deploy,[data-stage="7"] .scr-live{opacity:1;transform:none}
+.journey k{color:var(--x-key)}.journey ty{color:var(--x-type)}.journey mt{color:var(--x-fn)}.journey str{color:var(--x-str)}.journey ok{color:var(--x-ok)}.journey er{color:var(--x-err)}.journey wa{color:var(--x-warn)}
+.code .ln{white-space:pre;position:relative}
+.code em{display:inline-block;width:2.4cqw;color:#4b4d68;font-style:normal}
+.code .c{color:#6b6d88}
+.caret{display:inline-block;width:.5cqw;height:1.2cqw;vertical-align:middle;background:var(--x-key);animation:caret 1s steps(2) infinite}
+.at{color:var(--x-type)}
+.scr-code .code{counter-reset:ln 11}.scr-code .ln em:before{counter-increment:ln;content:counter(ln)}
+.scr-code .fix{display:none}
+[data-stage="4"] .scr-code .fix{display:block;background:#3ddc8424;animation:wipe .8s var(--ease) .5s both}
+[data-stage="3"] .scr-code .bad{background:#ff4d4d2a;text-decoration:underline wavy var(--x-err) .12cqw;text-underline-offset:.35cqw;animation:flash-bad .4s 1s both}
+.term{position:absolute;left:0;right:0;bottom:0;padding:1cqw 1.5cqw;background:#090a13;font-size:.88cqw;line-height:1.55;opacity:0;transform:translateY(100%);transition:opacity .5s,transform .7s var(--ease)}
+.term>div{display:none}
+[data-stage="3"] .term,[data-stage="4"] .term{opacity:1;transform:none;transition-delay:.9s}
+[data-stage="4"] .term{transition-delay:0s}
+[data-stage="3"] .t-err,[data-stage="4"] .t-ok{display:block}
+[data-stage="4"] .t-ok{animation:appear .5s var(--ease) 1.3s both}
+.t-err b{color:var(--x-err)}
+
+/* plan */
+.scr-plan{display:grid;grid-template-columns:1fr 1fr;gap:1cqw;align-items:center}
+.tree div{color:#b9b6d6}
+.tree .d1{padding-left:1.4cqw}.tree .d2{padding-left:3cqw;color:var(--x-type)}
+.rings{width:100%;max-height:100%}
+.rings .r{fill:none;stroke:#c3b5ff;stroke-width:1.4;stroke-dasharray:600;opacity:.85}
+.rings .r1{fill:#c3b5ff22}
+.rings text{fill:#d9d4f7;font:600 9px -apple-system,BlinkMacSystemFont,sans-serif;text-anchor:middle}
+
+/* tests */
+.tx-head{color:var(--x-dim);margin-bottom:.6cqw;display:flex;justify-content:space-between}
+.tx,.step{display:flex;align-items:center;gap:.8cqw;white-space:nowrap}
+.tx i,.step i{color:var(--x-dim);font-style:normal;margin-left:auto}
+.tick{flex:none;width:1cqw;height:1cqw;border-radius:50%;background:var(--x-ok)}
+.tx-bar,.dp-bar{height:.6cqw;margin-top:1.1cqw;border-radius:.4cqw;background:#23253b;overflow:hidden}
+.tx-bar span,.dp-bar span{display:block;height:100%;background:var(--x-ok);transform-origin:left}
+.dp-bar span{background:#7aa7ff}
+.dp-done{margin-top:1cqw;opacity:0;transform:translateY(.6cqw);transition:opacity .5s,transform .5s var(--ease)}
+[data-stage="6"][data-late] .dp-done{opacity:1;transform:none}
+
+/* live app */
+.scr-live{background:#f4f3fa;color:#1b1a26;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.br-url{margin:-1.3cqw -1.5cqw 1.3cqw;padding:.55cqw 1.5cqw;background:#e4e2ef;color:#5a5870;font-size:.85cqw}
+.app-h{font-size:1.8cqw;font-weight:700;letter-spacing:-.04em;margin-bottom:.7cqw}
+.app-row{display:flex;justify-content:space-between;padding:.6cqw 0;font-size:1.05cqw}
+.app-row+.app-row{border-top:1px solid #dcdae8}
+.scr-live ok{color:#13834a;font-weight:600}.scr-live wa{color:#9a6a00;font-weight:600}
+
+/* ---------- screen choreography: each plays once on arrival ---------- */
+[data-stage="1"] .tree div{animation:appear .4s var(--ease) calc(.35s + var(--i) * .13s) both}
+[data-stage="1"] .rings .r{animation:draw 1.3s var(--ease) both}
+[data-stage="1"] .rings .r1{animation-delay:.5s}[data-stage="1"] .rings .r2{animation-delay:.75s}[data-stage="1"] .rings .r3{animation-delay:1s}[data-stage="1"] .rings .r4{animation-delay:1.25s}
+[data-stage="1"] .rings text{animation:appear .5s 1.6s both}
+[data-stage="2"] .scr-code .ln{animation:type .42s steps(16) calc(.5s + var(--i) * .3s) both}
+[data-stage="5"] .tx{animation:appear .3s var(--ease) calc(.4s + var(--i) * .32s) both}
+[data-stage="5"] .tx .tick{animation:tick-on .25s calc(.6s + var(--i) * .32s) both}
+[data-stage="5"] .tx-bar span{animation:fill 2.4s var(--ease) .4s both}
+[data-stage="5"] .tx-sum{animation:appear .5s 2.6s both}
+[data-stage="6"] .step{animation:dim-in .3s calc(.4s + var(--i) * .55s) both}
+[data-stage="6"] .step .tick{animation:tick-on .25s calc(.6s + var(--i) * .55s) both}
+[data-stage="6"] .dp-bar span{animation:fill 3s linear .4s both}
+
+/* ---------- character ---------- */
+.character{position:absolute;top:0;bottom:0;right:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%);transform-origin:50% 100%;animation:breathe 6s ease-in-out infinite}
+.pose{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;opacity:0;transform:scale(1.04);transition:opacity .55s var(--ease),transform .9s var(--ease)}
+[data-pose="thinking"] .pose[data-p="thinking"],[data-pose="excited"] .pose[data-p="excited"],[data-pose="coding"] .pose[data-p="coding"],[data-pose="debugging"] .pose[data-p="debugging"],[data-pose="solved"] .pose[data-p="solved"],[data-pose="relaxed"] .pose[data-p="relaxed"]{opacity:1;transform:none}
+
+
+/* ---------- desk & props ---------- */
+.desk{position:absolute;left:-2%;right:-2%;bottom:0;background:#2a1f1d;border-top:1cqw solid #3e2d27}
+.keyboard{position:absolute;padding:.45cqw;border-radius:.55cqw;background:#15151f;display:grid;grid-template-rows:repeat(4,1fr);gap:.22cqw}
+.keyboard i{border-radius:.15cqw;background:repeating-linear-gradient(90deg,#2b2c40 0 1.2cqw,transparent 0 1.45cqw)}
+[data-pose="coding"] .keyboard i{animation:keys .18s steps(2) infinite}
+.keyboard i:nth-child(2){animation-delay:-.07s}.keyboard i:nth-child(3){animation-delay:-.12s}
+.lamp{position:absolute}
+.lamp .base{position:absolute;left:10%;bottom:0;width:60%;height:5%;border-radius:1cqw 1cqw 0 0;background:#1e1f2c}
+.lamp .arm{position:absolute;left:36%;bottom:4%;width:.6cqw;height:84%;border-radius:.4cqw;background:#24253a;transform:rotate(10deg);transform-origin:bottom}
+.lamp .head{position:absolute;left:60%;top:0;width:80%;height:15%;border-radius:4cqw 4cqw .6cqw .6cqw;background:#2a2b40;transform:rotate(22deg);box-shadow:0 .6cqw 0 -.2cqw #ffd59a}
+.mug{position:absolute;border-radius:.3cqw .3cqw .8cqw .8cqw;background:#1a1a24}
+.mug:after{content:"";position:absolute;right:-38%;top:22%;width:42%;height:46%;border:.45cqw solid #1a1a24;border-left:0;border-radius:0 2cqw 2cqw 0}
+.steam{position:absolute;left:30%;bottom:105%;width:.45cqw;height:3cqw;border-radius:1cqw;background:#ffffff30;animation:steam 3.2s ease-in infinite}
+.steam+.steam{left:60%;animation-delay:-1.6s}
+
+/* ---------- floating story elements (a region over the scene's working area) ---------- */
+.fx{position:absolute;pointer-events:none;opacity:calc(1 - var(--fa,0) * 1.6)}
+.fx-g{position:absolute;inset:0;visibility:hidden}
+[data-stage="0"] .g0,[data-stage="1"] .g1,[data-stage="2"] .g2,[data-stage="3"] .g3,[data-stage="4"] .g4,[data-stage="5"] .g5,[data-stage="6"] .g6,[data-stage="7"] .g7{visibility:visible}
+.fx-g>*{position:absolute;opacity:0}
+[data-stage="0"] .g0>*,[data-stage="1"] .g1>*,[data-stage="2"] .g2>*,[data-stage="3"] .g3>*,[data-stage="4"] .g4>*,[data-stage="5"] .g5>*,[data-stage="6"] .g6>*,[data-stage="7"] .g7>*{opacity:1;animation:float-in .8s var(--pop) .5s both}
+.fx-g>:nth-child(2){animation-delay:.65s!important}.fx-g>:nth-child(3){animation-delay:.8s!important}.fx-g>:nth-child(4){animation-delay:.95s!important}.fx-g>:nth-child(5){animation-delay:1.1s!important}
+[data-stage="3"] .g3>*{animation-delay:1.1s!important}[data-stage="3"] .g3>:nth-child(2){animation-delay:1.4s!important}
+[data-stage="6"] .g6>.path{animation:none}
+.card{padding:1cqw 1.4cqw;border-radius:.8cqw;background:#181a2e;border:1px solid #c3b5ff55;color:var(--x-ink);font:600 1.45cqw/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;white-space:nowrap}
+.card small{font-weight:500;color:var(--x-dim);font-size:1.1cqw}
+.card b{display:inline-grid;place-items:center;width:1.9cqw;height:1.9cqw;margin-right:.6cqw;border-radius:50%;font-size:1.2cqw}
+.bubble{border-radius:50%;background:#2a2c48}
+.b1{left:36%;top:44%;width:1.2cqw;height:1.2cqw}.b2{left:33%;top:37%;width:2cqw;height:2cqw}
+.idea.i1{left:20%;top:12.5%}.idea.i2{left:2%;top:4%}
+[data-late] .idea{opacity:.4;transition:opacity .5s}
+.bulb{left:50%;top:3%;width:3.4cqw;fill:#3a3c58;transition:fill .4s}
+[data-stage="0"][data-late] .bulb{fill:#ffd36b;animation:pop .6s var(--ease)}
+.arch{left:4%;top:2%;width:56%}
+.arch .wire{fill:none;stroke:#c3b5ff;stroke-width:1.2;stroke-dasharray:4 4;opacity:.7;animation:dash 1.2s linear infinite}
+.arch rect{fill:#181a2e;stroke:#c3b5ff88}.arch .mq rect{fill:#2b2350}
+.arch text{fill:#e9e6f5;font:600 9px -apple-system,BlinkMacSystemFont,sans-serif;text-anchor:middle}
+[data-stage="1"] .arch .node{animation:appear .45s var(--ease) calc(.6s + var(--i) * .2s) both}
+.chip.c1{left:2%;top:7%}.chip.c2{left:36%;top:4%}.chip.c3{right:8%;top:6%}
+.toast.err{right:8%;top:6%;border-color:#ff7a7a99}.toast.err b{background:#ff4d4d;color:#fff}
+.toast.warn{left:2%;top:7%;border-color:#ffcf6b88}.toast.warn b{color:var(--x-warn)}
+.toast.ok{right:8%;top:6%;border-color:#7ee0a699}.toast.ok b{background:#3ddc84;color:#08130c}
+.toast.big{left:30%;top:4%;font-size:1.7cqw}
+.chip.t1{left:2%;top:6%}.chip.t2{left:32%;top:3%}.chip.t3{right:8%;top:5%}
+.env{display:flex;flex-direction:column;align-items:center;gap:.4cqw;color:var(--x-ink);font:600 1.3cqw -apple-system,BlinkMacSystemFont,sans-serif}
+.env.dev{left:4%;top:4%}.env.prod{right:10%;top:2%}
+.env .box{width:4.4cqw;height:3.2cqw;border-radius:.4cqw;background:#23253b;border:1px solid #c3b5ff55}
+.env svg{width:5.4cqw;fill:#2a3c6e;stroke:#7aa7ff;stroke-width:1.2;transition:fill .5s}
+[data-late] .env.prod svg{fill:#1d5a3a;stroke:var(--x-ok)}
+.path{left:13%;right:21%;top:8%;height:.3cqw;border-radius:.3cqw;background:#2a2c48}
+.packet{position:absolute;top:-.45cqw;left:calc(100% - 1.2cqw);width:1.2cqw;height:1.2cqw;border-radius:50%;background:#7aa7ff}
+[data-stage="6"] .packet{animation:travel 3s linear .4s both}
+
+/* ambient */
+.particles{position:absolute;inset:0;pointer-events:none}
+.particles i{position:absolute;left:var(--x);bottom:-2%;width:.32cqw;height:.32cqw;border-radius:50%;background:#c3b5ff;opacity:0;animation:rise var(--d) linear var(--l) infinite}
+.tint{position:absolute;inset:0;background:#ff2a2a;opacity:0;mix-blend-mode:soft-light;transition:opacity .8s;pointer-events:none}
+[data-stage="3"] .tint{opacity:.22;transition-delay:.9s}
+
+/* =========================================================
+   LANDSCAPE (desktop, laptop, tablet sideways): the room fills the screen,
+   the caption sits on the wall at the left, the work happens on the right.
+   ========================================================= */
+@media (min-aspect-ratio:5/4){
+  .js-journey .scene{position:absolute;left:50%;top:50%;width:max(100%,var(--pin-h) * 16 / 9);height:max(100%,100vw * 9 / 16);transform:translate(-50%,-50%)}
+  html:not(.js-journey) .scene{aspect-ratio:16/9}
+  .window{left:33%;top:6%;width:30%;height:32%}
+  .shelf,.lamp{display:none}
+  .monitor{left:31%;top:21%;width:37%}
+  .character{width:41%}
+  .desk{height:26%;right:36%;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent)}
+  .keyboard{left:36%;bottom:9%;width:21%;height:5.6%}
+  .mug{left:58.5%;bottom:9%;width:3.2%;height:9%}
+  .lamp-light{left:4%;bottom:4%;width:40%;height:56%}
+  .screen-light{left:26%;top:12%;width:46%;height:66%}
+  .fx{inset:0}
+  .cam{transform-origin:30% 55%}
+  .idea.i2{left:33%;top:5%}.idea.i1{left:42%;top:13%}.bulb{left:57%;top:4%}.b1{left:50%;top:24%}.b2{left:52.5%;top:19%}
+  .arch{left:30%;top:2%;width:38%}
+  .chip.c1{left:31%;top:6%}.chip.c2{left:45%;top:3%}.chip.c3{left:53%;right:auto;top:10%}
+  .toast.warn{left:31%;top:5%}.toast.err{left:50%;right:auto;top:12%}.toast.ok{left:47%;right:auto;top:6%}
+  .chip.t1{left:31%;top:6%}.chip.t2{left:44%;top:2.5%}.chip.t3{left:56%;right:auto;top:9%}
+  .env.dev{left:32%;top:4%}.env.prod{left:59%;right:auto;top:2%}.path{left:36.5%;right:41%;top:8%}
+  .toast.big{left:38%;top:5%}
+  .js-journey .journey-captions{left:max(24px,4.5vw);top:0;bottom:120px;width:min(25vw,370px)}
+  .js-journey .journey-rail{left:max(24px,4.5vw);bottom:max(28px,5vh);width:min(25vw,370px)}
+  .js-journey .journey-auto{left:max(24px,4.5vw);bottom:calc(max(28px,5vh) + 62px)}
+  [data-stage="7"] .cam{transform:scale(1)}
+}
+
+/* =========================================================
+   PORTRAIT (phones, tablets upright): caption on the wall above,
+   the room below at full width, stage rail along the desk.
+   ========================================================= */
+@media (max-aspect-ratio:5/4){
+  .journey{--sh:min(108vw,calc(var(--pin-h) - 210px))}
+  .js-journey .scene{position:absolute;left:0;right:0;bottom:0;height:var(--sh)}
+  html:not(.js-journey) .scene{aspect-ratio:4/4.3}
+  .window{left:4%;top:4%;width:52%;height:28%}
+  .shelf{display:none}
+  .window{width:44%}
+  .monitor{left:3%;top:30%;width:66%}
+  .screen{font-size:1.95cqw;line-height:1.5}
+  .ide-bar{height:3.2cqw;font-size:1.4cqw}.ide-bar i{width:.9cqw;height:.9cqw}.scr{inset:3.2cqw 0 0;padding:1.6cqw}
+  .code em{width:3.4cqw}.term{font-size:1.5cqw}.br-url{font-size:1.4cqw;margin:-1.6cqw -1.6cqw 1.6cqw}.app-h{font-size:2.8cqw}.app-row{font-size:1.8cqw}
+  .tick{width:1.6cqw;height:1.6cqw}.tx-bar,.dp-bar{height:1cqw}
+  .neck{height:5cqw}.foot{height:1.2cqw}
+  .character{width:54%}
+  .desk{height:22%}
+  .keyboard{left:14%;bottom:7%;width:40%;height:6%}
+  .mug{left:60%;bottom:7%;width:6%;height:9%}
+  .lamp{display:none}
+  .lamp-light{left:-10%;bottom:0;width:50%;height:50%}
+  .screen-light{left:0;top:22%;width:80%;height:60%}
+  .fx{inset:0}
+  .card{font-size:2.3cqw}.card small{font-size:1.8cqw}.card b{width:3cqw;height:3cqw;font-size:1.8cqw}
+  .env{font-size:2.2cqw}.env svg{width:8cqw}.env .box{width:6cqw;height:4.5cqw}
+  .arch{left:3%;width:94%}
+  .chip.c2,.chip.t2,.idea.i2,.b1,.b2{display:none}
+  .idea.i1{left:5%;right:auto;top:6%}.bulb{left:40%;right:auto;top:5%;width:5cqw}
+  .arch{left:3%;width:62%;top:2%}
+  .chip.c1,.chip.t1,.toast.err,.toast.ok,.toast.big{left:4%;right:auto;top:5%}
+  .chip.c3,.chip.t3,.toast.warn{left:4%;right:auto;top:16%}
+  .env.dev{left:5%;top:4%}.env.prod{left:40%;right:auto;top:3%}.path{left:13%;right:64%}
+  .js-journey .journey-captions{left:20px;right:20px;top:0;bottom:var(--sh)}
+  .journey-captions h3{font-size:clamp(36px,10vw,64px);margin-bottom:10px}
+  .journey-captions p{font-size:17px}
+  .journey-captions .journey-final{font-size:clamp(20px,5vw,28px)}
+  .journey-cta{margin-top:16px}
+  .js-journey .journey-rail{left:16px;right:16px;bottom:14px;z-index:4}
+  .js-journey .journey-auto{right:16px;bottom:70px}
+  .journey-rail button{font-size:0;padding-top:8px}
+  [data-stage="2"] .cam,[data-stage="3"] .cam,[data-stage="5"] .cam{transform:scale(1.05) translate(2%,0)}
+}
+
+/* phones held sideways: the same layout, scaled to a short screen */
+@media (min-aspect-ratio:5/4) and (max-height:520px){
+  .journey-captions h3{font-size:30px;margin-bottom:8px}
+  .journey-captions p{font-size:14px;max-width:none}
+  .journey-captions .journey-final{font-size:16px}
+  .journey-cta{margin-top:12px;padding:9px 12px}
+  .js-journey .journey-captions{bottom:52px;width:min(27vw,340px)}
+  .journey-rail button{font-size:0;padding-top:8px}
+  .js-journey .journey-rail{bottom:14px}
+  .js-journey .journey-auto{bottom:30px}
+  .js-journey .journey-skip{top:10px}
+  .card{font-size:1.15cqw}
+}
+/* comfortable tap targets on touch screens */
+@media (hover:none){.js-journey .journey-auto,.js-journey .journey-skip{min-height:38px;padding-left:14px;padding-right:14px}}
+
+/* ---------- no JavaScript: a plain list above the finished scene ---------- */
+html:not(.js-journey) .journey-captions{width:min(1100px,calc(100% - 48px));margin:0 auto;padding:56px 0}
+html:not(.js-journey) .journey-captions h3{font-size:28px;margin-bottom:6px}
+html:not(.js-journey) .journey-captions li{padding-bottom:22px}
+
+@keyframes pop-in{from{opacity:0;transform:translateY(28px) scale(.94)}}
+@keyframes float-in{from{opacity:0;transform:translateY(2.4cqw) scale(.9)}}
+@keyframes appear{from{opacity:0;transform:translateY(.5cqw)}}
+@keyframes dim-in{from{opacity:.35}}
+@keyframes type{from{clip-path:inset(-2px 100% -2px 0)}to{clip-path:inset(-2px 0 -2px 0)}}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes draw{from{stroke-dashoffset:600}to{stroke-dashoffset:0}}
+@keyframes tick-on{from{background:#2c2e48}}
+@keyframes fill{from{transform:scaleX(0)}}
+@keyframes travel{from{left:0}}
+@keyframes flash-bad{from{background:transparent}}
+@keyframes twinkle{to{opacity:.25}}
+@keyframes blink{50%{opacity:.3}}
+@keyframes caret{50%{opacity:0}}
+@keyframes breathe{50%{transform:scale(1.012)}}
+@keyframes type-bob{to{translate:0 .25%}}
+@keyframes keys{50%{opacity:.6}}
+@keyframes steam{0%{transform:translateY(0) scaleY(.6);opacity:0}30%{opacity:.6}100%{transform:translateY(-2.4cqw) scaleY(1.2) translateX(.6cqw);opacity:0}}
+@keyframes pop{40%{scale:1.25}}
+@keyframes dash{to{stroke-dashoffset:-16}}
+@keyframes rise{0%{transform:translateY(0);opacity:0}15%{opacity:.5}100%{transform:translateY(-60cqw);opacity:0}}
+
+/* ---------- reduced motion: same screens, final states, no travel ---------- */
+@media (prefers-reduced-motion:reduce){
+  .journey *,.journey *:before,.journey *:after{animation:none!important;transition-duration:.01s!important;transition-delay:0s!important}
+  .cam,.layer{transform:none!important}
+  .js-journey .journey-captions{transform:none}
+  .particles{display:none}
+}
