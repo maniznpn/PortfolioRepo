@@ -27,7 +27,7 @@
     [['solved', 0]],                                     // it clicks
     [['coding', 0]],                                     // tests run
     [['excited', 0, true]],                              // deploy completes
-    [['coffee', 0], ['relaxed', 4200]]                   // shipped: a coffee, then a well-earned rest
+    [['coffee', 0], ['relaxed', 5000]]                   // shipped: a coffee, then a well-earned rest
   ]
   // how long a screen holds before autoplay moves on (ms, counted from when it arrived)
   const DWELL = [6200, 6200, 7200, 6600, 6200, 6800, 7600];
@@ -153,7 +153,7 @@
     track.style.setProperty('--f', 0); track.style.setProperty('--fa', 0);
     window.FilmJourney = {
       count: LAST + 1,
-      dwell: DWELL.concat([9000]),
+      dwell: DWELL.concat([10500]),
       go(s, force) {
         s = Math.max(0, Math.min(LAST, s));
         track.style.setProperty('--p', (s / LAST).toFixed(4));

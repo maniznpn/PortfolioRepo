@@ -488,3 +488,18 @@ html:not(.film) .journey-auto{display:none!important}
 /* the done stage holds longer: coffee first, then the eyes close */
 .pose[data-p="relaxed"]{transition-duration:2.2s,3s}
 @media (prefers-reduced-motion:reduce){.brainstorm *{animation:none!important;stroke-dashoffset:0!important;opacity:1}}
+
+/* wide, short screens: crop the room from the bottom (desk), never the top where the cards float */
+@media (min-aspect-ratio:5/4){
+  .js-journey .scene{top:0;transform:translate(-50%,0)}
+  .character{top:0;bottom:calc(max(var(--pin-h),100vw * 9 / 16) - var(--pin-h))}
+}
+/* the stage rail stops before the monitor starts, so the two never overlap */
+@media (min-aspect-ratio:5/4){
+  .js-journey .journey-rail{width:clamp(250px,31vw - 100px,400px)}
+}
+@media (min-aspect-ratio:5/4) and (max-width:1340px){
+  .journey-rail button:not([aria-current]){color:transparent}
+  .journey-rail button:not([aria-current]):hover{color:#c9c6dc}
+}
+@media (min-aspect-ratio:5/4) and (max-width:1100px){.journey-captions p{max-width:205px}}
