@@ -28,6 +28,12 @@ const FALLBACK_EMAIL = 'neupanem01@gmail.com';
   // while someone is writing, hold the film on this scene
   const hold = () => { if (window.Film) window.Film.hold(true); };
   form.addEventListener('focusin', hold); form.addEventListener('input', hold);
+  // the window's header reacts as they write: "typing…" while keys move, back to online when they stop
+  const presence = sec.querySelector('.msg-presence em'); let typeT = 0;
+  form.addEventListener('input', () => {
+    sec.classList.add('typing'); if (presence) presence.textContent = 'You are typing…';
+    clearTimeout(typeT); typeT = setTimeout(() => { sec.classList.remove('typing'); if (presence) presence.textContent = 'Online · replies within a day'; }, 1400);
+  });
   // done with the form: the film may carry on after a quiet moment
   form.addEventListener('focusout', () => setTimeout(() => { if (!form.contains(document.activeElement) && window.Film) window.Film.hold(false); }, 0));
 
@@ -88,24 +94,39 @@ const FALLBACK_EMAIL = 'neupanem01@gmail.com';
       location.href = `mailto:${FALLBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(data.message + '\n\n— ' + data.name + ' (' + data.email + ')')}`;
       return;
     }
-    send.disabled = true; sec.classList.add('sending');
+    send.disabled = true; sec.classList.remove('failed'); sec.classList.add('sending');
+    // the packet always makes its whole trip on screen, whatever the network does
+    const trip = new Promise((r) => setTimeout(r, 1800));
+    let res, why = '';
     try {
-      const [res] = await Promise.all([
-        fetch('https://api.web3forms.com/submit', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ access_key: WEB3FORMS_ACCESS_KEY, subject, from_name: data.name, replyto: data.email, ...data })
-        }).then((r) => r.json()),
-        new Promise((r) => setTimeout(r, 1400)) // let the packet make its trip
-      ]);
-      if (!res.success) throw new Error(res.message || 'Not sent');
+      const r = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ access_key: WEB3FORMS_ACCESS_KEY, subject, from_name: data.name, replyto: data.email, ...data })
+      });
+      res = await r.json().catch(() => ({ success: false, message: 'HTTP ' + r.status }));
+      if (!res.success) why = res.message || ('HTTP ' + r.status);
+    } catch (x) {
+      res = { success: false };
+      why = 'network'; // blocked or offline: previews and local files can't reach the mail service
+    }
+    await trip;
+    if (res.success) {
       sec.querySelector('.msg-who').textContent = data.name.split(' ')[0];
       sec.querySelector('.msg-mail').textContent = data.email;
       sec.classList.remove('sending'); sec.classList.add('sent'); done.hidden = false;
       form.reset();
-    } catch (x) {
-      sec.classList.remove('sending'); send.disabled = false;
-      err.innerHTML = `It didn’t go through. <a href="mailto:${FALLBACK_EMAIL}">Email me directly</a> instead?`;
+      return;
     }
+    // failed: the packet stalls at the relay and turns red, then the form comes back with the reason
+    if (window.console) console.warn('[Say hello] Web3Forms did not accept the message:', why);
+    sec.classList.add('failed');
+    await new Promise((r) => setTimeout(r, 1500));
+    sec.classList.remove('sending', 'failed'); send.disabled = false;
+    const local = /^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname) || location.protocol === 'file:' || /claude|usercontent/.test(location.hostname);
+    const reason = why === 'network'
+      ? (local ? 'This preview can’t reach the mail service — it works on the live site.' : 'Couldn’t reach the mail service — check your connection.')
+      : 'The mail service said: “' + why + '”.';
+    err.innerHTML = `It didn’t go through. ${reason} <a href="mailto:${FALLBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(data.message)}">Email me directly</a> instead?`;
   });
 
   sec.querySelector('.msg-again').addEventListener('click', () => {

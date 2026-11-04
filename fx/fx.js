@@ -4,7 +4,7 @@
 // Everything is split once here; CSS plays it when a scene becomes active (or a card arrives).
 (() => {
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  const KEY = /^(\.NET|ASP\.NET|EF|Core|Gitea|Actions|zero-downtime|IIS|RESTful|AnemiaAI|IzoneV2|RabbitMQ|MongoDB|PostgreSQL|microservices|Docker|Saga|Jenkins|CI\/CD|multi-DbContext)$/i;
+  const KEY = /^(\.NET|ASP\.NET|EF|Core|Gitea|Actions|zero-downtime|IIS|RESTful|HemScreen|IzoneV2|RabbitMQ|MongoDB|PostgreSQL|microservices|Docker|Saga|Jenkins|CI\/CD|multi-DbContext)$/i;
   const bare = (w) => w.replace(/^[(“"']+|[)”"'.,;:!?]+$/g, '');
 
   // a sentence → words; keys get marked; the original text stays readable to screen readers

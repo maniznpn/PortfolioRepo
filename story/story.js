@@ -19,18 +19,18 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   // [pose, at ms, sets data-late]
-  const BEATS = [
-    [['thinking', 0], ['excited', 1900, true]],          // idea lands
+  const BEATS = [ // one photo per stage, its expression matching the moment
+    [['idea', 0]],                                       // brainstorming on the notepad
     [['thinking', 0]],                                   // planning
     [['coding', 0]],                                     // typing
-    [['coding', 0], ['debugging', 1000]],                // the error appears
-    [['solved', 0], ['excited', 1700]],                  // it clicks, then relief
+    [['debugging', 0]],                                  // the error appears
+    [['solved', 0]],                                     // it clicks
     [['coding', 0]],                                     // tests run
-    [['coding', 0], ['excited', 3500, true]],            // deploy completes
-    [['relaxed', 0]]                                     // shipped
-  ];
+    [['excited', 0, true]],                              // deploy completes
+    [['coffee', 0], ['relaxed', 4200]]                   // shipped: a coffee, then a well-earned rest
+  ]
   // how long a screen holds before autoplay moves on (ms, counted from when it arrived)
-  const DWELL = [3900, 3900, 4900, 4200, 3900, 4600, 5400];
+  const DWELL = [6200, 6200, 7200, 6600, 6200, 6800, 7600];
 
   // split each title into words so they can rise out of a mask
   track.querySelectorAll('.journey-captions h3').forEach((h) => {
@@ -85,7 +85,7 @@
     const pre = pos < -0.2;
     track.toggleAttribute('data-pre', pre);
     if (pre) {
-      if (stage !== -1) { stage = -1; beatTimers.forEach(clearTimeout); beatTimers = []; track.dataset.stage = 0; setPose('thinking'); }
+      if (stage !== -1) { stage = -1; beatTimers.forEach(clearTimeout); beatTimers = []; track.dataset.stage = 0; setPose('idea'); }
       track.style.setProperty('--f', 0); track.style.setProperty('--fa', 0);
       return;
     }
@@ -153,7 +153,7 @@
     track.style.setProperty('--f', 0); track.style.setProperty('--fa', 0);
     window.FilmJourney = {
       count: LAST + 1,
-      dwell: DWELL.concat([4800]),
+      dwell: DWELL.concat([9000]),
       go(s, force) {
         s = Math.max(0, Math.min(LAST, s));
         track.style.setProperty('--p', (s / LAST).toFixed(4));
